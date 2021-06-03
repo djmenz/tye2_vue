@@ -1,13 +1,65 @@
 <template>
   <div class="masterlist">
+
+    <v-container fluid>
+    <v-row>
+    <v-col cols="4" justify="center">
+
+ <h2>New Food Database Entry</h2>
+
+          <v-text-field
+          v-model="formFoodName"
+            label="Food Name"
+          ></v-text-field>
+            <v-text-field
+            v-model="formCalories"
+            label="Calories"
+          ></v-text-field>
+            <v-text-field
+            v-model="formProtein"
+            label="Protein"
+          ></v-text-field>
+
+            <v-text-field
+            v-model="formCarbs"
+            label="Carbs"
+          ></v-text-field>
+
+            <v-text-field
+            v-model="formFats"
+            label="Fat"
+          ></v-text-field>
+      <p>{{ formPreviewCalories }} Estimated Calories</p>
+      <v-btn
+      color="success"
+      class="mr-4"
+      @click="submit"
+    >
+      Submit
+    </v-btn>
+
+    <v-btn
+      color="error"
+      class="mr-4"
+      @click="submit"
+    >
+      Reset Form
+    </v-btn>
+
+    </v-col>
+    <v-col cols="6" justify="center">
     <h3>
     <router-link to="/today">Today</router-link> |
     <router-link to="/masterlist">Masterlist</router-link> |
-    <router-link to="/logout">Logout</router-link>
+    <router-link to="/templates">Templates</router-link>
     </h3>
-    <h1>Masterfood database</h1>
-    <table class="table table-hover"
-    style="border:1px solid black;margin-left:auto;margin-right:auto;">
+    <h1>Masterfood database
+          <v-switch
+      v-model="switch1"
+      :label="`Show only users items: ${switch1.toString()}`"
+    ></v-switch>
+    </h1>
+    <v-simple-table >
               <thead>
             <tr>
               <th scope="col">ID</th>
@@ -32,9 +84,12 @@
       <td>{{ message.fats }}</td>
       </tr>
     </tbody>
-    </table>
+    </v-simple-table>
 
-    <h3>TEST</h3>
+    </v-col>
+  </v-row>
+  </v-container>
+
   </div>
 </template>
 
@@ -46,14 +101,19 @@ export default {
   name: 'dailyView',
   data() {
     return {
+      switch1: false,
       todays_date: '',
       msg: '',
+      formFoodName: '',
+      formCalories: 0,
+      formProtein: 0,
+      formCarbs: 0,
+      formFats: 0,
     };
   },
   methods: {
     getMessage() {
       const path = 'http://localhost:8000/api/foods';
-      console.log('HELLLOOOO');
       // const path = ('http://localhost:5000/daily_mem/' + this.date);
       const auth = `Bearer ${localStorage.getItem('token')}`;
       axios.get(path, {
@@ -65,14 +125,47 @@ export default {
       })
         .then((res) => {
           console.log(res.data);
-          this.msg = res.data;
+          if (this.switch1) {
+            // need to get actual user's id and then trigger the field to change
+            this.msg = res.data.filter((entry) => entry.creator_id === 1);
+          } else {
+            this.msg = res.data.sort((a, b) => (a.name > b.name ? 1 : -1));
+          }
         })
         .catch((error) => {
           // eslint-disable-next-line
           console.error(error);
         });
     },
-    computed: {
+    submit() {
+      console.log(this.formFoodName);
+      console.log(this.formCalories);
+      const auth = `Bearer ${localStorage.getItem('token')}`;
+      const EntryData = {
+        name: this.formFoodName,
+        extended_info: 'Test Info',
+        calories: this.formCalories,
+        protein: this.formProtein,
+        carbs: this.formCarbs,
+        fats: this.formFats,
+      };
+      axios.post('http://localhost:8000/api/foods',
+        EntryData,
+        {
+          headers:
+          {
+            'content-type': 'application/json',
+            Authorization: auth,
+          },
+        }).then((response) => {
+        console.log(response);
+        this.getMessage();
+      });
+    },
+  },
+  computed: {
+    formPreviewCalories() {
+      return this.formProtein * 4 + this.formCarbs * 4 + this.formFats * 9;
     },
   },
   created() {

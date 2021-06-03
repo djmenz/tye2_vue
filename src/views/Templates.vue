@@ -3,37 +3,7 @@
   <v-container fluid>
     <v-row>
     <v-col cols="4" justify="center">
-    <v-date-picker
-    v-model="todays_date"
-     :landscape="landscape"
-     first-day-of-week=1
-     >
-     </v-date-picker>
-        <v-row style="height: 80px;"></v-row>
 
-          <h2>Weekly Stats</h2>
-     <v-simple-table >
-              <thead>
-            <tr>
-              <th scope="col">Day</th>
-              <th scope="col">Cals</th>
-              <th scope="col">Protein</th>
-              <th scope="col">Carbs</th>
-              <th scope="col">Fats</th>
-            </tr>
-          </thead>
-          <tbody>
-    <tr v-for="day in thisWeek" v-bind:key="day">
-      <td>{{ day }}</td>
-      <td>{{ day.quantity }}</td>
-      <td>{{ day.calories * day.quantity }}</td>
-      <td>{{ day.protein  * day.quantity}}</td>
-      <td>{{ day.carbs * day.quantity }}</td>
-      <td>
-      </td>
-      </tr>
-    </tbody>
-    </v-simple-table>
     </v-col>
     <v-col cols="6" justify="center">
     <h3>
@@ -54,14 +24,6 @@
             v-model="formQuantity"
             label="Quantity"
           ></v-text-field>
-
-    <v-btn
-      color="success"
-      class="mr-4"
-      @click="submit"
-    >
-      Add entry
-    </v-btn>
       <v-autocomplete
         v-model="template"
         :items=templates
@@ -71,8 +33,15 @@
       class="mr-4"
       @click="submit"
     >
-      Add Template Entries
+      Add To chosen Template
     </v-btn>
+
+      <v-btn
+      color="warning"
+      class="mr-2"
+      @click="deleteItem(message.id)"
+        >Create new template</v-btn>
+
     <v-row style="height: 80px;"></v-row>
 
           <h2>Calories:{{ todaysTotals.cals }}
@@ -114,6 +83,7 @@
       </tr>
     </tbody>
     </v-simple-table>
+
     </v-col>
     </v-row>
   </v-container>
@@ -129,7 +99,6 @@ export default {
   data() {
     return {
       todays_date: '',
-      thisWeek: [],
       msg: [],
       masterFoodList: [],
       templates: [
@@ -148,8 +117,6 @@ export default {
   },
   computed: {
     todaysFood() {
-      // These shouldnt be using this side effect, changing the date should emit an event
-      this.genStats();
       return this.msg.filter((oneDay) => oneDay.date.includes(this.todays_date));
     },
     todaysTotals() {
@@ -169,11 +136,10 @@ export default {
     },
   },
   methods: {
-    oneDaysFood(day) {
-      return this.msg.filter((oneDay) => oneDay.date.includes(day));
-    },
     getMessage() {
+      // const path = 'http://localhost:8000/api/foods';
       const path = 'http://localhost:8000/api/trackingmerged';
+      // const path = ('http://localhost:5000/daily_mem/' + this.date);
       const auth = `Bearer ${localStorage.getItem('token')}`;
       axios.get(path, {
         headers:
@@ -255,16 +221,6 @@ export default {
         this.getMessage();
       });
     },
-    genStats() {
-      this.thisWeek = [];
-      const startOfWeek = moment(this.todays_date).add(1 - moment(this.todays_date).isoWeekday(), 'days').format('YYYY-MM-DD');
-      for (let i = 0; i < 7; i += 1) {
-        console.log(i);
-        const newDay = moment(startOfWeek).add(i, 'days').format('ddd MM/DD');
-        this.thisWeek.push(newDay);
-      }
-      console.log(this.thisWeek);
-    },
     deleteItem(id) {
       console.log(id);
       const auth = `Bearer ${localStorage.getItem('token')}`;
@@ -287,7 +243,6 @@ export default {
     this.getMasterFoods();
     this.todays_date = moment().format('YYYY-MM-DD');
     console.log(this.todays_date);
-    this.genStats();
     // this.login();
   },
 };

@@ -1,13 +1,26 @@
 <template>
   <div id="login">
+    <v-container fill-height>
+    <v-row justify="center" align="center">
     <h1>Please Login</h1>
-    <form @submit.prevent="login">
+    </v-row>
+     <v-row justify="center" align="center">
+    <v-form @submit.prevent="login">
       <input v-model="username" placeholder="username">
       <input v-model="password" placeholder="password" type="password">
-      <input type="submit" value="login">
-    </form>
+
+      <v-btn
+      color="success"
+      class="mr-4"
+      @click="submit"
+      value="login"
+      type="submit"
+    >Login</v-btn>
+    </v-form>
     <div><img alt="Vue logo" src="../assets/white_square.jpg"></div>
     <div><img alt="Vue logo" src="../assets/food_logo.jpg"></div>
+    </v-row>
+    </v-container>
   </div>
 </template>
 

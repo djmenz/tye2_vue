@@ -3,6 +3,7 @@ import VueRouter from 'vue-router';
 // import Home from '../views/Home.vue';
 import Login from '../views/Login.vue';
 import Masterlist from '../views/Masterlist.vue';
+import Templates from '../views/Templates.vue';
 
 Vue.use(VueRouter);
 
@@ -35,6 +36,14 @@ const routes = [
       requiresAuth: true,
     },
     component: () => import(/* webpackChunkName: "about" */ '../views/Today.vue'),
+  },
+  {
+    path: '/templates',
+    name: 'templates',
+    component: Templates,
+    meta: {
+      requiresAuth: true,
+    },
   },
 ];
 
