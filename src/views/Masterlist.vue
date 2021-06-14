@@ -73,15 +73,15 @@
             </tr>
           </thead>
           <tbody>
-    <tr v-for="message in msg" v-bind:key="message">
-      <td>{{ message.id }}</td>
-      <td>{{ message.name }}</td>
-      <td>{{ message.extended_info }}</td>
-      <td>{{ message.creator_id }}</td>
-      <td>{{ message.calories  }}</td>
-      <td>{{ message.protein }}</td>
-      <td>{{ message.carbs }}</td>
-      <td>{{ message.fats }}</td>
+    <tr v-for="entry in msg" v-bind:key="entry">
+      <td>{{ entry.id }}</td>
+      <td>{{ entry.name }}</td>
+      <td>{{ entry.extended_info }}</td>
+      <td>{{ entry.creator_id }}</td>
+      <td>{{ entry.calories  }}</td>
+      <td>{{ entry.protein }}</td>
+      <td>{{ entry.carbs }}</td>
+      <td>{{ entry.fats }}</td>
       </tr>
     </tbody>
     </v-simple-table>
@@ -112,9 +112,8 @@ export default {
     };
   },
   methods: {
-    getMessage() {
+    getMasterlistData() {
       const path = 'http://localhost:8000/api/foods';
-      // const path = ('http://localhost:5000/daily_mem/' + this.date);
       const auth = `Bearer ${localStorage.getItem('token')}`;
       axios.get(path, {
         headers:
@@ -159,7 +158,7 @@ export default {
           },
         }).then((response) => {
         console.log(response);
-        this.getMessage();
+        this.getMasterlistData();
       });
     },
   },
@@ -169,7 +168,7 @@ export default {
     },
   },
   created() {
-    this.getMessage();
+    this.getMasterlistData();
     this.todays_date = moment().format('YYYY-MM-DD');
     console.log(this.todays_date);
   },

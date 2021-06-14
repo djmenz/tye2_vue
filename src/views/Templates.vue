@@ -13,6 +13,14 @@
     </h3>
     <!-- <h1>{{ todays_date }}</h1> -->
      <h2>New Entry</h2>
+        <v-autocomplete
+        v-model="current_template"
+        :items=templates
+        item-text="name"
+        item-value="id"
+        hint="Select Template to Edit"
+        persistent-hint=true
+      ></v-autocomplete>
 
       <v-autocomplete
         v-model="formFoodItem"
@@ -24,10 +32,6 @@
             v-model="formQuantity"
             label="Quantity"
           ></v-text-field>
-      <v-autocomplete
-        v-model="template"
-        :items=templates
-      ></v-autocomplete>
           <v-btn
       color="success"
       class="mr-4"
@@ -44,32 +48,30 @@
 
     <v-row style="height: 80px;"></v-row>
 
-          <h2>Calories:{{ todaysTotals.cals }}
-          P:{{ todaysTotals.P }}
-          C:{{ todaysTotals.C }}
-          F:{{ todaysTotals.F }}</h2>
       <v-simple-table >
               <thead>
             <tr>
-              <th scope="col">Food</th>
+              <th scope="col">template_id</th>
+              <th scope="col">Food ID</th>
               <th scope="col">Quantity</th>
-              <th scope="col">Cals</th>
+              <!-- <th scope="col">Cals</th>
               <th scope="col">Protein</th>
               <th scope="col">Carbs</th>
-              <th scope="col">Fats</th>
+              <th scope="col">Fats</th> -->
               <th scope="col">Entry ID</th>
               <th scope="col">Action></th>
             </tr>
           </thead>
           <tbody>
 
-    <tr v-for="message in todaysFood" v-bind:key="message">
-      <td>{{ message.name }}</td>
+    <tr v-for="message in currentTemplatesFood" v-bind:key="message">
+      <td>{{ message.template_id }}</td>
+      <td>{{ message.food_id }}</td>
       <td>{{ message.quantity }}</td>
-      <td>{{ message.calories * message.quantity }}</td>
+      <!-- <td>{{ message.calories * message.quantity }}</td>
       <td>{{ message.protein  * message.quantity}}</td>
       <td>{{ message.carbs * message.quantity }}</td>
-      <td>{{ message.fats * message.quantity }}</td>
+      <td>{{ message.fats * message.quantity }}</td> -->
       <td>{{ message.id }}</td>
       <td>
        <v-btn
@@ -95,51 +97,32 @@ import axios from 'axios';
 import moment from 'moment';
 
 export default {
-  name: 'dailyView',
+  name: 'templateView',
   data() {
     return {
       todays_date: '',
-      msg: [],
+      current_template: '',
+      allTemplatesFood: [],
       masterFoodList: [],
-      templates: [
-        'weekend',
-        'weekday',
-        'mcdonalds big mac meal',
-      ],
+      templates: [],
       picker: '',
       landscape: true,
       formFoodItem: 8, // sets the default autocomplete
       formQuantity: 1.0,
-      template: 'weekend',
-      attrs: '',
+      template: '',
       on: '',
     };
   },
   computed: {
-    todaysFood() {
-      return this.msg.filter((oneDay) => oneDay.date.includes(this.todays_date));
-    },
-    todaysTotals() {
-      const tempStats = {
-        cals: 0,
-        P: 0,
-        C: 0,
-        F: 0,
-      };
-      this.todaysFood.forEach((e) => {
-        tempStats.cals += e.calories * e.quantity;
-        tempStats.P += e.protein * e.quantity;
-        tempStats.C += e.carbs * e.quantity;
-        tempStats.F += e.fats * e.quantity;
-      });
-      return tempStats;
+    currentTemplatesFood() {
+      return this.allTemplatesFood.filter(
+        (oneTemplate) => oneTemplate.template_id === this.current_template,
+      );
     },
   },
   methods: {
     getMessage() {
-      // const path = 'http://localhost:8000/api/foods';
-      const path = 'http://localhost:8000/api/trackingmerged';
-      // const path = ('http://localhost:5000/daily_mem/' + this.date);
+      const path = 'http://localhost:8000/api/templatedata';
       const auth = `Bearer ${localStorage.getItem('token')}`;
       axios.get(path, {
         headers:
@@ -150,7 +133,7 @@ export default {
       })
         .then((res) => {
           console.log(res.data);
-          this.msg = res.data;
+          this.allTemplatesFood = res.data;
         })
         .catch((error) => {
           // eslint-disable-next-line
@@ -182,34 +165,33 @@ export default {
           console.error(error);
         });
     },
-    login() {
-      const formData = new FormData();
-      formData.set('username', 'dan');
-      formData.set('password', 'hello');
-      axios.post('http://localhost:8000/token',
-        formData,
-        {
-          headers: { 'content-type': 'application/x-www-form-urlencoded' },
-        }).then((response) => {
-        // console.log(response);
-        localStorage.setItem('token', response.data.access_token);
-      }).catch((error) => {
-        console.log('Error login');
-        console.log(error);
-      });
-      this.dialog = false;
+    getTemplates() {
+      const path = 'http://localhost:8000/api/templateinfo';
+      const auth = `Bearer ${localStorage.getItem('token')}`;
+      axios.get(path, {
+        headers:
+      {
+        accept: 'application/json',
+        Authorization: auth,
+      },
+      })
+        .then((res) => {
+          this.templates = res.data;
+          console.log(res.data);
+        })
+        .catch((error) => {
+          // eslint-disable-next-line
+          console.error(error);
+        });
     },
     submit() {
-      console.log(this.attrs);
-      console.log(this.formFoodName);
-      console.log(this.formCalories);
       const auth = `Bearer ${localStorage.getItem('token')}`;
       const EntryData = {
         food_id: this.formFoodItem,
         quantity: this.formQuantity,
-        date: this.todays_date,
+        template_id: this.current_template,
       };
-      axios.post('http://localhost:8000/api/tracking',
+      axios.post('http://localhost:8000/api/templatedata',
         EntryData,
         {
           headers: {
@@ -224,7 +206,7 @@ export default {
     deleteItem(id) {
       console.log(id);
       const auth = `Bearer ${localStorage.getItem('token')}`;
-      axios.delete(`http://localhost:8000/api/tracking?id_to_del=${id}`,
+      axios.delete(`http://localhost:8000/api/templatedata?id_to_del=${id}`,
         {
           headers: {
             'content-type': 'application/json',
@@ -235,11 +217,13 @@ export default {
         this.getMessage();
       });
     },
-    computed: {
+    showTemplateTest() {
+      console.log(this.current_template);
     },
   },
   created() {
     this.getMessage();
+    this.getTemplates();
     this.getMasterFoods();
     this.todays_date = moment().format('YYYY-MM-DD');
     console.log(this.todays_date);
