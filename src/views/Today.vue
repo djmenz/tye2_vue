@@ -74,7 +74,10 @@
         :items=templates
         item-text="name"
         item-value="id"
+        hint="Select Template to Add"
+        persistent-hint=true
       ></v-autocomplete>
+      <v-row style="height: 40px;"></v-row>
           <v-btn
       color="orange"
       class="mr-4"
@@ -82,6 +85,7 @@
     >
       Add Template Entries
     </v-btn>
+
     <v-row style="height: 80px;"></v-row>
           <h2>Total Calories: {{ todaysCombinedtotals.cals }}
           P:{{ todaysCombinedtotals.P }}
@@ -135,22 +139,23 @@
     <v-simple-table >
     <tr>
           <td><h3>Consumed</h3></td>
-          <td>Cals:{{ todaysTotals.consumed.cals }}</td>
-          <td>P:{{ todaysTotals.consumed.P }}</td>
-          <td>C:{{ todaysTotals.consumed.C }}</td>
-          <td>F:{{ todaysTotals.consumed.F }}</td>
+          <td>Cals: {{ todaysTotals.consumed.cals }}</td>
+          <td>P: {{ todaysTotals.consumed.P }}</td>
+          <td>C: {{ todaysTotals.consumed.C }}</td>
+          <td>F: {{ todaysTotals.consumed.F }}</td>
           </tr>
           <tr>
           <td><h3>Planned</h3></td>
-          <td>Cals:{{ todaysTotals.planned.cals }}</td>
-          <td>P:{{ todaysTotals.planned.P }}</td>
-          <td>C:{{ todaysTotals.planned.C }}</td>
-          <td>F:{{ todaysTotals.planned.F }}</td>
+          <td>Cals: {{ todaysTotals.planned.cals }}</td>
+          <td>P: {{ todaysTotals.planned.P }}</td>
+          <td>C: {{ todaysTotals.planned.C }}</td>
+          <td>F: {{ todaysTotals.planned.F }}</td>
           </tr>
     </v-simple-table>
     </v-col>
     </v-row>
   </v-container>
+
   </div>
 </template>
 
@@ -175,6 +180,7 @@ export default {
       formQuantity: 1.0,
       template: '',
       on: '',
+      dialog: false,
     };
   },
   computed: {
@@ -253,7 +259,9 @@ export default {
       })
         .then((res) => {
           console.log(res.data);
-          this.usersTrackedData = res.data;
+          this.usersTrackedData = res.data.sort(
+            (a, b) => (a.id > b.id ? 1 : -1),
+          );
         })
         .catch((error) => {
           // eslint-disable-next-line
@@ -291,6 +299,10 @@ export default {
         (oneDay) => oneDay.template_id === this.template,
       );
       console.log(oneTemplate);
+      oneTemplate.forEach((e) => {
+        console.log(e);
+        this.submitTemplateItem(e, false);
+      });
     },
     async getUsersTemplates() {
       const path = 'http://localhost:8000/api/templateinfo';
@@ -305,23 +317,6 @@ export default {
       this.templates = templatesInfo.data;
       this.templatesData = templatesData.data;
     },
-    // login() {
-    //   const formData = new FormData();
-    //   formData.set('username', '');
-    //   formData.set('password', '');
-    //   axios.post('http://localhost:8000/token',
-    //     formData,
-    //     {
-    //       headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    //     }).then((response) => {
-    //     // console.log(response);
-    //     localStorage.setItem('token', response.data.access_token);
-    //   }).catch((error) => {
-    //     console.log('Error login');
-    //     console.log(error);
-    //   });
-    //   this.dialog = false;
-    // },
     submit(consumed) {
       console.log(this.formFoodName);
       console.log(this.formCalories);
@@ -344,6 +339,27 @@ export default {
         this.getUsersTrackingData();
       });
     },
+    submitTemplateItem(item, consumed) {
+      const auth = `Bearer ${localStorage.getItem('token')}`;
+      const EntryData = {
+        food_id: item.food_id,
+        quantity: item.quantity,
+        date: this.todays_date,
+        consumed,
+      };
+      axios.post('http://localhost:8000/api/tracking',
+        EntryData,
+        {
+          headers: {
+            'content-type': 'application/json',
+            Authorization: auth,
+          },
+        }).then((response) => {
+        console.log(response);
+        this.getUsersTrackingData();
+      });
+    },
+
     genStats() {
       this.thisWeek = [];
       const startOfWeek = moment(this.todays_date).add(1 - moment(this.todays_date).isoWeekday(), 'days').format('YYYY-MM-DD');

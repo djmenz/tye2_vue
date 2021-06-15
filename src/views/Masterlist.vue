@@ -4,7 +4,7 @@
     <v-container fluid>
     <v-row>
     <v-col cols="4" justify="center">
-
+<v-row style="height: 140px;"></v-row>
  <h2>New Food Database Entry</h2>
 
           <v-text-field

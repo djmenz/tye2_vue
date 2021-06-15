@@ -51,27 +51,29 @@
       <v-simple-table >
               <thead>
             <tr>
-              <th scope="col">template_id</th>
-              <th scope="col">Food ID</th>
+              <th scope="col">Name</th>
               <th scope="col">Quantity</th>
-              <!-- <th scope="col">Cals</th>
+              <th scope="col">Cals</th>
               <th scope="col">Protein</th>
               <th scope="col">Carbs</th>
-              <th scope="col">Fats</th> -->
+              <th scope="col">Fats</th>
               <th scope="col">Entry ID</th>
+              <th scope="col">template_id</th>
+              <th scope="col">Food ID</th>
               <th scope="col">Action></th>
             </tr>
           </thead>
           <tbody>
 
     <tr v-for="message in currentTemplatesFood" v-bind:key="message">
-      <td>{{ message.template_id }}</td>
-      <td>{{ message.food_id }}</td>
+      <td>{{ message.name }}</td>
       <td>{{ message.quantity }}</td>
-      <!-- <td>{{ message.calories * message.quantity }}</td>
+      <td>{{ message.calories * message.quantity }}</td>
       <td>{{ message.protein  * message.quantity}}</td>
       <td>{{ message.carbs * message.quantity }}</td>
-      <td>{{ message.fats * message.quantity }}</td> -->
+      <td>{{ message.fats * message.quantity }}</td>
+      <td>{{ message.template_id }}</td>
+      <td>{{ message.food_id }}</td>
       <td>{{ message.id }}</td>
       <td>
        <v-btn
@@ -85,7 +87,16 @@
       </tr>
     </tbody>
     </v-simple-table>
-
+    <v-row style="height: 80px;"></v-row>
+ <v-simple-table>
+          <tr>
+          <td><h3>Template Totals</h3></td>
+          <td>Cals: {{ todaysTotals.cals }}</td>
+          <td>P: {{ todaysTotals.P }}</td>
+          <td>C: {{ todaysTotals.C }}</td>
+          <td>F: {{ todaysTotals.F }}</td>
+          </tr>
+    </v-simple-table>
     </v-col>
     </v-row>
   </v-container>
@@ -119,10 +130,25 @@ export default {
         (oneTemplate) => oneTemplate.template_id === this.current_template,
       );
     },
+    todaysTotals() {
+      const tempStats = {
+        cals: 0,
+        P: 0,
+        C: 0,
+        F: 0,
+      };
+      this.currentTemplatesFood.forEach((e) => {
+        tempStats.cals += e.calories * e.quantity;
+        tempStats.P += e.protein * e.quantity;
+        tempStats.C += e.carbs * e.quantity;
+        tempStats.F += e.fats * e.quantity;
+      });
+      return tempStats;
+    },
   },
   methods: {
     getMessage() {
-      const path = 'http://localhost:8000/api/templatedata';
+      const path = 'http://localhost:8000/api/templatesmerged';
       const auth = `Bearer ${localStorage.getItem('token')}`;
       axios.get(path, {
         headers:
