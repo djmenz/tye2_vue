@@ -12,7 +12,55 @@
     <router-link to="/templates">Templates</router-link>
     </h3>
     <!-- <h1>{{ todays_date }}</h1> -->
-     <h2>New Entry</h2>
+     <h2>Template Modification</h2>
+     <v-row style="height: 40px;"></v-row>
+
+<v-dialog
+      v-model="dialog2"
+      width="500"
+    >
+      <template v-slot:activator="{ on, attrs }">
+        <v-btn
+          color="blue lighten-2"
+          v-bind="attrs"
+          v-on="on"
+        >
+          Create New Template
+        </v-btn>
+      </template>
+
+      <v-card>
+        <v-card-title class="text-h5 grey lighten-2">
+          New template
+        </v-card-title>
+
+        <v-card-text>
+        <v-text-field
+            v-model="newTemplateName"
+            label="Template Name"
+          ></v-text-field>
+        <v-text-field
+            v-model="newTemplateExtendedInfo"
+            label="Extended Information"
+          ></v-text-field>
+        </v-card-text>
+
+        <v-divider></v-divider>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            text
+            @click="createNewTemplate"
+          >
+            Create New Template
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+     <v-row style="height: 40px;"></v-row>
         <v-autocomplete
         v-model="current_template"
         :items=templates
@@ -22,6 +70,7 @@
         persistent-hint=true
       ></v-autocomplete>
 
+      <div  v-if="current_template != ''">
       <v-autocomplete
         v-model="formFoodItem"
         :items=masterFoodList
@@ -40,12 +89,6 @@
       Add To chosen Template
     </v-btn>
 
-      <v-btn
-      color="warning"
-      class="mr-2"
-      @click="deleteItem(message.id)"
-        >Create new template</v-btn>
-
     <v-row style="height: 80px;"></v-row>
 
       <v-simple-table >
@@ -57,10 +100,10 @@
               <th scope="col">Protein</th>
               <th scope="col">Carbs</th>
               <th scope="col">Fats</th>
-              <th scope="col">Entry ID</th>
               <th scope="col">template_id</th>
               <th scope="col">Food ID</th>
-              <th scope="col">Action></th>
+              <th scope="col">Entry ID</th>
+              <th scope="col">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -77,11 +120,11 @@
       <td>{{ message.id }}</td>
       <td>
        <v-btn
-      color="warning"
+      color="error"
       class="mr-2"
       @click="deleteItem(message.id)"
         >
-        Delete
+        X
        </v-btn>
       </td>
       </tr>
@@ -97,6 +140,16 @@
           <td>F: {{ todaysTotals.F }}</td>
           </tr>
     </v-simple-table>
+<v-row style="height: 40px;"></v-row>
+    <v-btn
+      color="error"
+      class="mr-4"
+      @click="deleteSelectedTemplate()"
+    >
+      Delete Selected Template
+    </v-btn>
+
+    </div>
     </v-col>
     </v-row>
   </v-container>
@@ -122,12 +175,17 @@ export default {
       formQuantity: 1.0,
       template: '',
       on: '',
+      dialog2: false,
+      newTemplateName: '',
+      newTemplateExtendedInfo: '',
     };
   },
   computed: {
     currentTemplatesFood() {
       return this.allTemplatesFood.filter(
         (oneTemplate) => oneTemplate.template_id === this.current_template,
+      ).sort(
+        (a, b) => (a.id > b.id ? 1 : -1),
       );
     },
     todaysTotals() {
@@ -203,8 +261,35 @@ export default {
       })
         .then((res) => {
           this.templates = res.data;
-          console.log(res.data);
         })
+        .catch((error) => {
+          // eslint-disable-next-line
+          console.error(error);
+        });
+    },
+    createNewTemplate() {
+      this.dialog2 = false;
+      const path = 'http://localhost:8000/api/templateinfo';
+      const EntryData = {
+        name: this.newTemplateName,
+        extended_info: this.newTemplateExtendedInfo,
+      };
+      const auth = `Bearer ${localStorage.getItem('token')}`;
+      axios.post(path,
+        EntryData,
+        {
+          headers: {
+            'content-type': 'application/json',
+            Authorization: auth,
+          },
+        }).then((res) => {
+        this.templates = res.data;
+        console.log(res.data);
+        this.current_template = res.data;
+        this.newTemplateName = '';
+        this.newTemplateExtendedInfo = '';
+        this.getTemplates();
+      })
         .catch((error) => {
           // eslint-disable-next-line
           console.error(error);
@@ -230,7 +315,6 @@ export default {
       });
     },
     deleteItem(id) {
-      console.log(id);
       const auth = `Bearer ${localStorage.getItem('token')}`;
       axios.delete(`http://localhost:8000/api/templatedata?id_to_del=${id}`,
         {
@@ -243,8 +327,25 @@ export default {
         this.getMessage();
       });
     },
-    showTemplateTest() {
-      console.log(this.current_template);
+    deleteTemplate(id) {
+      const auth = `Bearer ${localStorage.getItem('token')}`;
+      axios.delete(`http://localhost:8000/api/templateinfo?id_to_del=${id}`,
+        {
+          headers: {
+            'content-type': 'application/json',
+            Authorization: auth,
+          },
+        }).then((response) => {
+        console.log(response);
+        this.getTemplates();
+      });
+    },
+    deleteSelectedTemplate() {
+      this.deleteTemplate(this.current_template);
+      this.currentTemplatesFood.forEach((e) => {
+        this.deleteItem(e.id);
+      });
+      this.current_template = '';
     },
   },
   created() {

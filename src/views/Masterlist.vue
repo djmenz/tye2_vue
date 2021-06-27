@@ -54,7 +54,7 @@
     <router-link to="/templates">Templates</router-link>
     </h3>
     <h1>Masterfood database
-          <v-switch
+    <v-switch
       v-model="switch1"
       :label="`Show only users items: ${switch1.toString()}`"
     ></v-switch>
@@ -73,7 +73,7 @@
             </tr>
           </thead>
           <tbody>
-    <tr v-for="entry in msg" v-bind:key="entry">
+    <tr v-for="entry in filteredList" v-bind:key="entry">
       <td>{{ entry.id }}</td>
       <td>{{ entry.name }}</td>
       <td>{{ entry.extended_info }}</td>
@@ -102,6 +102,7 @@ export default {
   data() {
     return {
       switch1: false,
+      userID: '',
       todays_date: '',
       msg: '',
       formFoodName: '',
@@ -110,6 +111,21 @@ export default {
       formCarbs: 0,
       formFats: 0,
     };
+  },
+  computed: {
+    filteredList() {
+      if (this.msg) {
+        if (this.switch1) {
+          return this.msg.filter((entry) => entry.creator_id === this.userID);
+        }
+        const temp = this.msg;
+        return temp.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1));
+      }
+      return [];
+    },
+    formPreviewCalories() {
+      return this.formProtein * 4 + this.formCarbs * 4 + this.formFats * 9;
+    },
   },
   methods: {
     getMasterlistData() {
@@ -124,12 +140,27 @@ export default {
       })
         .then((res) => {
           console.log(res.data);
-          if (this.switch1) {
-            // need to get actual user's id and then trigger the field to change
-            this.msg = res.data.filter((entry) => entry.creator_id === 1);
-          } else {
-            this.msg = res.data.sort((a, b) => (a.name > b.name ? 1 : -1));
-          }
+          this.msg = res.data.sort(
+            (a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1),
+          );
+        })
+        .catch((error) => {
+          // eslint-disable-next-line
+          console.error(error);
+        });
+    },
+    getUserID() {
+      const path = 'http://localhost:8000/users/me/';
+      const auth = `Bearer ${localStorage.getItem('token')}`;
+      axios.get(path, {
+        headers:
+      {
+        accept: 'application/json',
+        Authorization: auth,
+      },
+      })
+        .then((res) => {
+          this.userID = res.data.id;
         })
         .catch((error) => {
           // eslint-disable-next-line
@@ -162,12 +193,8 @@ export default {
       });
     },
   },
-  computed: {
-    formPreviewCalories() {
-      return this.formProtein * 4 + this.formCarbs * 4 + this.formFats * 9;
-    },
-  },
   created() {
+    this.getUserID();
     this.getMasterlistData();
     this.todays_date = moment().format('YYYY-MM-DD');
     console.log(this.todays_date);

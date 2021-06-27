@@ -23,17 +23,25 @@
             </tr>
           </thead>
           <tbody>
-    <tr v-for="day in thisWeek" v-bind:key="day">
-      <td>{{ day }}</td>
-      <td>{{ oneDaysTotals(oneDaysFood(day)).cals  }}</td>
-      <td>{{ oneDaysTotals(oneDaysFood(day)).P}}</td>
-      <td>{{ oneDaysTotals(oneDaysFood(day)).C}}</td>
-      <td>{{ oneDaysTotals(oneDaysFood(day)).F }}</td>
+    <tr v-for="day in thisWeeksData" v-bind:key="day">
+      <td>{{ day.date }}</td>
+      <td>{{ day.cals }}</td>
+      <td>{{ day.P }}</td>
+      <td>{{ day.C }}</td>
+      <td>{{ day.F }}</td>
       <td>
       </td>
       </tr>
+      <tr>
+      <td><h3>Averages({{ thisWeeksStats.count }}/7)</h3></td>
+          <td><h3>{{ thisWeeksStats.avgCal.toFixed(0) }}</h3></td>
+          <td><h3>{{ thisWeeksStats.avgP.toFixed(0) }}</h3></td>
+          <td><h3>{{thisWeeksStats.avgC.toFixed(0) }}</h3></td>
+          <td><h3>{{thisWeeksStats.avgF.toFixed(0) }}</h3></td>
+          </tr>
     </tbody>
     </v-simple-table>
+
     </v-col>
     <v-col cols="6" justify="center">
     <h3>
@@ -42,17 +50,22 @@
     <router-link to="/templates">Templates</router-link>
     </h3>
     <!-- <h1>{{ todays_date }}</h1> -->
+    <v-switch
+      v-model="switch1"
+      :label="`Show only users items: ${switch1.toString()}`"
+    ></v-switch>
      <h2>New Entry</h2>
 
       <v-autocomplete
         v-model="formFoodItem"
-        :items=masterFoodList
+        :items=filteredList
         item-text="name"
         item-value="id"
       ></v-autocomplete>
             <v-text-field
             v-model="formQuantity"
             label="Quantity"
+            width=5
           ></v-text-field>
 
     <v-btn
@@ -69,22 +82,85 @@
     >
       Add for Planning
     </v-btn>
-      <v-autocomplete
-        v-model="template"
-        :items=templates
-        item-text="name"
-        item-value="id"
-        hint="Select Template to Add"
-        persistent-hint=true
-      ></v-autocomplete>
       <v-row style="height: 40px;"></v-row>
-          <v-btn
-      color="orange"
-      class="mr-4"
-      @click="submitTemplate"
+    <v-dialog
+      v-model="dialog"
+      width="500"
     >
-      Add Template Entries
-    </v-btn>
+      <template v-slot:activator="{ on, attrs }">
+        <v-btn
+          color="orange"
+          v-bind="attrs"
+          v-on="on"
+        >
+          Add Template Entries
+        </v-btn>
+      </template>
+
+      <v-card>
+        <v-card-title class="text-h5 grey lighten-2">
+          Select food template to add
+        </v-card-title>
+     <v-card-text>
+            <v-select
+              :items="templates"
+              v-model="template"
+              item-text="name"
+              item-value="id"
+              solo
+            ></v-select>
+
+            <v-simple-table v-if="template != ''">
+              <thead>
+            <tr>
+              <th scope="col">Food</th>
+              <th scope="col">Quantity</th>
+              <th scope="col">Cals</th>
+              <th scope="col">Protein</th>
+              <th scope="col">Carbs</th>
+              <th scope="col">Fats</th>
+            </tr>
+          </thead>
+          <tbody>
+
+    <tr v-for="entry in currentTemplateData" v-bind:key="entry">
+      <td>{{ entry.name }}</td>
+      <td>{{ entry.quantity }}</td>
+      <td>{{ entry.calories * entry.quantity }}</td>
+      <td>{{ entry.protein  * entry.quantity}}</td>
+      <td>{{ entry.carbs * entry.quantity }}</td>
+      <td>{{ entry.fats * entry.quantity }}</td>
+      <td>
+      </td>
+      </tr>
+    </tbody>
+    <v-row style="height: 80px;"></v-row>
+     <v-simple-table v-if="template != ''">
+          <tr>
+          <td>Cals: {{ curTemplateTotals.cals }}</td>
+          <td>P: {{ curTemplateTotals.P }}</td>
+          <td>C: {{ curTemplateTotals.C }}</td>
+          <td>F: {{ curTemplateTotals.F }}</td>
+          </tr>
+    </v-simple-table>
+    </v-simple-table>
+
+        </v-card-text>
+
+        <v-divider></v-divider>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            text
+            @click="submitTemplate"
+          >
+            Add Template Items
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <v-row style="height: 80px;"></v-row>
           <h2>Total Calories: {{ todaysCombinedtotals.cals }}
@@ -102,7 +178,7 @@
               <th scope="col">Fats</th>
               <th scope="col">Entry ID</th>
               <th scope="col">Consumed</th>
-              <th scope="col">Action></th>
+              <th scope="col">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -115,21 +191,20 @@
       <td>{{ entry.carbs * entry.quantity }}</td>
       <td>{{ entry.fats * entry.quantity }}</td>
       <td>{{ entry.id }}</td>
-      <td>{{ entry.consumed }}</td>
+      <td>        <v-btn v-if="!entry.consumed"
+      color="white"
+      class="mr-2"
+      @click="switchConsumedItem(entry.id, true)"
+        >
+        {{entry.consumed}}
+       </v-btn></td>
       <td>
-       <v-btn v-if="entry.consumed"
+       <v-btn
       color="error"
       class="mr-2"
       @click="deleteItem(entry.id)"
         >
-        Delete
-       </v-btn>
-        <v-btn v-if="!entry.consumed"
-      color="primary"
-      class="mr-2"
-      @click="setToConsumedItem(entry.id)"
-        >
-        Eaten
+        X
        </v-btn>
       </td>
       </tr>
@@ -152,6 +227,14 @@
           <td>F: {{ todaysTotals.planned.F }}</td>
           </tr>
     </v-simple-table>
+    <v-row style="height: 40px;"></v-row>
+    <v-btn
+      color="purple"
+      class="mr-4"
+      @click="resetDay()"
+    >
+      Reset Day
+    </v-btn>
     </v-col>
     </v-row>
   </v-container>
@@ -170,6 +253,7 @@ export default {
       todays_date: '',
       thisWeek: [],
       thisWeeksStats: [],
+      thisWeeksData: [],
       usersTrackedData: [],
       masterFoodList: [],
       templates: [],
@@ -181,12 +265,13 @@ export default {
       template: '',
       on: '',
       dialog: false,
+      switch1: false,
     };
   },
   computed: {
     todaysFood() {
       // These shouldnt be using this side effect, changing the date should emit an event
-      this.genStats();
+      // this.genStats();
       return this.usersTrackedData.filter((oneDay) => oneDay.date.includes(this.todays_date));
     },
     todaysTotals() {
@@ -226,6 +311,39 @@ export default {
       };
       return tempTotals;
     },
+    currentTemplateData() {
+      const oneTemplate = this.templatesData.filter(
+        (oneDay) => oneDay.template_id === this.template,
+      ).sort(
+        (a, b) => (a.id > b.id ? 1 : -1),
+      );
+      return oneTemplate;
+    },
+    curTemplateTotals() {
+      const tempStats = {
+        cals: 0,
+        P: 0,
+        C: 0,
+        F: 0,
+      };
+      this.currentTemplateData.forEach((e) => {
+        tempStats.cals += e.calories * e.quantity;
+        tempStats.P += e.protein * e.quantity;
+        tempStats.C += e.carbs * e.quantity;
+        tempStats.F += e.fats * e.quantity;
+      });
+      return tempStats;
+    },
+    filteredList() {
+      if (this.masterFoodList) {
+        if (this.switch1) {
+          return this.masterFoodList.filter((entry) => entry.creator_id === this.userID);
+        }
+        const temp = this.masterFoodList;
+        return temp.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1));
+      }
+      return [];
+    },
   },
   methods: {
     oneDaysFood(day) {
@@ -258,10 +376,10 @@ export default {
       },
       })
         .then((res) => {
-          console.log(res.data);
           this.usersTrackedData = res.data.sort(
             (a, b) => (a.id > b.id ? 1 : -1),
           );
+          this.genStats();
         })
         .catch((error) => {
           // eslint-disable-next-line
@@ -294,19 +412,21 @@ export default {
         });
     },
     submitTemplate() {
-      console.log(`template is ${this.template}`);
+      this.dialog = false;
+      // console.log(`template is ${this.template}`);
       const oneTemplate = this.templatesData.filter(
         (oneDay) => oneDay.template_id === this.template,
+      ).sort(
+        (a, b) => (a.id > b.id ? 1 : -1),
       );
-      console.log(oneTemplate);
       oneTemplate.forEach((e) => {
-        console.log(e);
         this.submitTemplateItem(e, false);
       });
+      this.genStats();
     },
     async getUsersTemplates() {
       const path = 'http://localhost:8000/api/templateinfo';
-      const dataPath = 'http://localhost:8000/api/templatedata';
+      const dataPath = 'http://localhost:8000/api/templatesmerged';
       const auth = `Bearer ${localStorage.getItem('token')}`;
       const headers = {
         accept: 'application/json',
@@ -318,8 +438,6 @@ export default {
       this.templatesData = templatesData.data;
     },
     submit(consumed) {
-      console.log(this.formFoodName);
-      console.log(this.formCalories);
       const auth = `Bearer ${localStorage.getItem('token')}`;
       const EntryData = {
         food_id: this.formFoodItem,
@@ -354,26 +472,51 @@ export default {
             'content-type': 'application/json',
             Authorization: auth,
           },
-        }).then((response) => {
-        console.log(response);
+        }).then(() => {
         this.getUsersTrackingData();
       });
     },
-
+    resetDay() {
+      this.todaysFood.forEach((e) => {
+        this.deleteItem(e.id);
+      });
+    },
     genStats() {
       this.thisWeek = [];
+      this.thisWeeksData = [];
       const startOfWeek = moment(this.todays_date).add(1 - moment(this.todays_date).isoWeekday(), 'days').format('YYYY-MM-DD');
       for (let i = 0; i < 7; i += 1) {
-        console.log(i);
         const newDay = moment(startOfWeek).add(i, 'days').format('YYYY-MM-DD');
         this.thisWeek.push(newDay);
-        // console.log(this.oneDaysTotals(startOfWeek))
-        // this.thisWeeksStats.push(this.oneDaysTotals(newDay));
+        // console.log(this.oneDaysTotals(startOfWeek));
+        const tempDayStats = this.oneDaysTotals(this.oneDaysFood(newDay));
+        tempDayStats.date = moment(newDay).format('ddd DD-MM');
+        this.thisWeeksData.push(tempDayStats);
       }
-      console.log(this.thisWeek);
+      const res = {
+        count: 0,
+        avgCal: 0,
+        avgC: 0,
+        avgF: 0,
+        avgP: 0,
+      };
+      this.thisWeeksData.forEach((el) => {
+        if (el.cals !== 0) {
+          res.count += 1;
+          res.avgCal += el.cals;
+          res.avgP += el.P;
+          res.avgC += el.C;
+          res.avgF += el.F;
+        }
+      });
+      res.avgCal /= res.count;
+      res.avgP /= res.count;
+      res.avgC /= res.count;
+      res.avgF /= res.count;
+      this.thisWeeksStats = res;
+      // console.log(this.thisWeek);
     },
     deleteItem(id) {
-      console.log(id);
       const auth = `Bearer ${localStorage.getItem('token')}`;
       axios.delete(`http://localhost:8000/api/tracking?id_to_del=${id}`,
         {
@@ -381,15 +524,14 @@ export default {
             'content-type': 'application/json',
             Authorization: auth,
           },
-        }).then((response) => {
-        console.log(response);
+        }).then(() => {
         this.getUsersTrackingData();
       });
     },
-    setToConsumedItem(id) {
+    switchConsumedItem(id, setting) {
       console.log(id);
       const EntryData = {
-        consumed: true,
+        consumed: setting,
       };
       const auth = `Bearer ${localStorage.getItem('token')}`;
       axios.patch(`http://localhost:8000/api/tracking/${id}`,
@@ -405,12 +547,30 @@ export default {
         this.getUsersTrackingData();
       });
     },
-    computed: {
+    getUserID() {
+      const path = 'http://localhost:8000/users/me/';
+      const auth = `Bearer ${localStorage.getItem('token')}`;
+      axios.get(path, {
+        headers:
+      {
+        accept: 'application/json',
+        Authorization: auth,
+      },
+      })
+        .then((res) => {
+          this.userID = res.data.id;
+        })
+        .catch((error) => {
+          // eslint-disable-next-line
+          console.error(error);
+        });
     },
+
   },
   created() {
     this.getUsersTrackingData();
     this.getMasterFoods();
+    this.getUserID();
     this.todays_date = moment().format('YYYY-MM-DD');
     // console.log(this.todays_date);
     this.genStats();
