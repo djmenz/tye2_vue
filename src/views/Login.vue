@@ -3,7 +3,7 @@
     <v-container fill-height>
     <v-row style="height: 40px;"></v-row>
     <v-row justify="center" align="center">
-    <h1>Track Your Eating</h1>
+    <h1>Track Your Eating 2</h1>
     </v-row>
      <v-row justify="center" align="center">
  <v-dialog
