@@ -159,6 +159,7 @@
 <script>
 import axios from 'axios';
 import moment from 'moment';
+import config from '../../config';
 
 export default {
   name: 'templateView',
@@ -206,7 +207,7 @@ export default {
   },
   methods: {
     getMessage() {
-      const path = 'http://localhost:8000/api/templatesmerged';
+      const path = `${config.apiUrl}/api/templatesmerged`;
       const auth = `Bearer ${localStorage.getItem('token')}`;
       axios.get(path, {
         headers:
@@ -225,7 +226,7 @@ export default {
         });
     },
     getMasterFoods() {
-      const path = 'http://localhost:8000/api/foods';
+      const path = `${config.apiUrl}/api/foods`;
       const auth = `Bearer ${localStorage.getItem('token')}`;
       axios.get(path, {
         headers:
@@ -250,7 +251,7 @@ export default {
         });
     },
     getTemplates() {
-      const path = 'http://localhost:8000/api/templateinfo';
+      const path = `${config.apiUrl}/api/templateinfo`;
       const auth = `Bearer ${localStorage.getItem('token')}`;
       axios.get(path, {
         headers:
@@ -269,7 +270,7 @@ export default {
     },
     createNewTemplate() {
       this.dialog2 = false;
-      const path = 'http://localhost:8000/api/templateinfo';
+      const path = `${config.apiUrl}/api/templateinfo`;
       const EntryData = {
         name: this.newTemplateName,
         extended_info: this.newTemplateExtendedInfo,
@@ -302,7 +303,7 @@ export default {
         quantity: this.formQuantity,
         template_id: this.current_template,
       };
-      axios.post('http://localhost:8000/api/templatedata',
+      axios.post(`${config.apiUrl}/api/templatedata`,
         EntryData,
         {
           headers: {
@@ -316,7 +317,7 @@ export default {
     },
     deleteItem(id) {
       const auth = `Bearer ${localStorage.getItem('token')}`;
-      axios.delete(`http://localhost:8000/api/templatedata?id_to_del=${id}`,
+      axios.delete(`${config.apiUrl}/api/templatedata?id_to_del=${id}`,
         {
           headers: {
             'content-type': 'application/json',
@@ -329,7 +330,7 @@ export default {
     },
     deleteTemplate(id) {
       const auth = `Bearer ${localStorage.getItem('token')}`;
-      axios.delete(`http://localhost:8000/api/templateinfo?id_to_del=${id}`,
+      axios.delete(`${config.apiUrl}/api/templateinfo?id_to_del=${id}`,
         {
           headers: {
             'content-type': 'application/json',

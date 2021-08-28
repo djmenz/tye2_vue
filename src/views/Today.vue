@@ -245,6 +245,7 @@
 <script>
 import axios from 'axios';
 import moment from 'moment';
+import config from '../../config';
 
 export default {
   name: 'dailyView',
@@ -366,7 +367,7 @@ export default {
       return tempStats;
     },
     getUsersTrackingData() {
-      const path = 'http://localhost:8000/api/trackingmerged';
+      const path = `${config.apiUrl}/api/trackingmerged`;
       const auth = `Bearer ${localStorage.getItem('token')}`;
       axios.get(path, {
         headers:
@@ -387,7 +388,7 @@ export default {
         });
     },
     getMasterFoods() {
-      const path = 'http://localhost:8000/api/foods';
+      const path = `${config.apiUrl}/api/foods`;
       const auth = `Bearer ${localStorage.getItem('token')}`;
       axios.get(path, {
         headers:
@@ -425,8 +426,8 @@ export default {
       this.genStats();
     },
     async getUsersTemplates() {
-      const path = 'http://localhost:8000/api/templateinfo';
-      const dataPath = 'http://localhost:8000/api/templatesmerged';
+      const path = `${config.apiUrl}/api/templateinfo`;
+      const dataPath = `${config.apiUrl}/api/templatesmerged`;
       const auth = `Bearer ${localStorage.getItem('token')}`;
       const headers = {
         accept: 'application/json',
@@ -445,7 +446,7 @@ export default {
         date: this.todays_date,
         consumed,
       };
-      axios.post('http://localhost:8000/api/tracking',
+      axios.post(`${config.apiUrl}/api/tracking`,
         EntryData,
         {
           headers: {
@@ -465,7 +466,7 @@ export default {
         date: this.todays_date,
         consumed,
       };
-      axios.post('http://localhost:8000/api/tracking',
+      axios.post(`${config.apiUrl}/api/tracking`,
         EntryData,
         {
           headers: {
@@ -518,7 +519,7 @@ export default {
     },
     deleteItem(id) {
       const auth = `Bearer ${localStorage.getItem('token')}`;
-      axios.delete(`http://localhost:8000/api/tracking?id_to_del=${id}`,
+      axios.delete(`${config.apiUrl}/api/tracking?id_to_del=${id}`,
         {
           headers: {
             'content-type': 'application/json',
@@ -534,7 +535,7 @@ export default {
         consumed: setting,
       };
       const auth = `Bearer ${localStorage.getItem('token')}`;
-      axios.patch(`http://localhost:8000/api/tracking/${id}`,
+      axios.patch(`${config.apiUrl}/api/tracking/${id}`,
         EntryData,
         {
           headers: {
@@ -548,7 +549,7 @@ export default {
       });
     },
     getUserID() {
-      const path = 'http://localhost:8000/users/me/';
+      const path = `${config.apiUrl}/users/me/`;
       const auth = `Bearer ${localStorage.getItem('token')}`;
       axios.get(path, {
         headers:

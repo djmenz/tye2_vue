@@ -107,6 +107,7 @@
 <script>
 
 import axios from 'axios';
+import config from '../../config';
 
 export default {
   name: 'login',
@@ -127,7 +128,7 @@ export default {
       const formData = new FormData();
       formData.set('username', this.username);
       formData.set('password', this.password);
-      axios.post('http://localhost:8000/token',
+      axios.post(`${config.apiUrl}/token`,
         formData,
         {
           headers: { 'content-type': 'application/x-www-form-urlencoded' },
@@ -150,7 +151,7 @@ export default {
       let validation = true;
       let errMsg = '';
       const reg = /^[A-Z0-9._%+-]+@([A-Z0-9-]+\.)+[A-Z]{2,4}$/i;
-      if (this.username.length < 5 || this.username.length > 20) {
+      if (this.newUsername.length < 5 || this.newUsername.length > 20) {
         validation = false;
         errMsg += '[username must be at least 5 characters and less than 20] ';
       }
@@ -169,7 +170,7 @@ export default {
         new_password: this.newPassword,
       };
       if (validation) {
-        axios.post('http://localhost:8000/api/users',
+        axios.post(`${config.apiUrl}/api/users`,
           newUserEntry,
           {
             headers: {

@@ -96,6 +96,7 @@
 <script>
 import axios from 'axios';
 import moment from 'moment';
+import config from '../../config';
 
 export default {
   name: 'dailyView',
@@ -129,7 +130,7 @@ export default {
   },
   methods: {
     getMasterlistData() {
-      const path = 'http://localhost:8000/api/foods';
+      const path = `${config.apiUrl}/api/foods`;
       const auth = `Bearer ${localStorage.getItem('token')}`;
       axios.get(path, {
         headers:
@@ -150,7 +151,7 @@ export default {
         });
     },
     getUserID() {
-      const path = 'http://localhost:8000/users/me/';
+      const path = `${config.apiUrl}/users/me/`;
       const auth = `Bearer ${localStorage.getItem('token')}`;
       axios.get(path, {
         headers:
@@ -179,7 +180,7 @@ export default {
         carbs: this.formCarbs,
         fats: this.formFats,
       };
-      axios.post('http://localhost:8000/api/foods',
+      axios.post(`${config.apiUrl}/api/foods`,
         EntryData,
         {
           headers:
