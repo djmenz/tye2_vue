@@ -1,3 +1,3 @@
 export default {
-  apiUrl: 'http://trackyoureating.com:8000',
+  apiUrl: 'https://trackyoureating.com:8000',
 };
