@@ -25,10 +25,10 @@
           <tbody>
     <tr v-for="day in thisWeeksData" v-bind:key="day">
       <td>{{ day.date }}</td>
-      <td>{{ day.cals }}</td>
-      <td>{{ day.P }}</td>
-      <td>{{ day.C }}</td>
-      <td>{{ day.F }}</td>
+      <td>{{ day.cals.toFixed(0) }}</td>
+      <td>{{ day.P.toFixed(0) }}</td>
+      <td>{{ day.C.toFixed(0) }}</td>
+      <td>{{ day.F.toFixed(0) }}</td>
       <td>
       </td>
       </tr>
@@ -163,10 +163,10 @@
     </v-dialog>
 
     <v-row style="height: 80px;"></v-row>
-          <h2>Total Calories: {{ todaysCombinedtotals.cals }}
-          P:{{ todaysCombinedtotals.P }}
-          C:{{ todaysCombinedtotals.C }}
-          F:{{ todaysCombinedtotals.F }}</h2>
+          <h2>Total Calories: {{ todaysCombinedtotals.cals.toFixed(0) }}
+          P:{{ todaysCombinedtotals.P.toFixed(0) }}
+          C:{{ todaysCombinedtotals.C.toFixed(0) }}
+          F:{{ todaysCombinedtotals.F.toFixed(0) }}</h2>
       <v-simple-table >
               <thead>
             <tr>
@@ -186,10 +186,10 @@
     <tr v-for="entry in todaysFood" v-bind:key="entry">
       <td>{{ entry.name }}</td>
       <td>{{ entry.quantity }}</td>
-      <td>{{ entry.calories * entry.quantity }}</td>
-      <td>{{ entry.protein  * entry.quantity}}</td>
-      <td>{{ entry.carbs * entry.quantity }}</td>
-      <td>{{ entry.fats * entry.quantity }}</td>
+      <td>{{ (entry.calories * entry.quantity).toFixed(0) }}</td>
+      <td>{{ (entry.protein  * entry.quantity).toFixed(0) }}</td>
+      <td>{{ (entry.carbs * entry.quantity).toFixed(0) }}</td>
+      <td>{{ (entry.fats * entry.quantity ).toFixed(0) }}</td>
       <td>{{ entry.id }}</td>
       <td>        <v-btn v-if="!entry.consumed"
       color="white"
@@ -214,17 +214,17 @@
     <v-simple-table >
     <tr>
           <td><h3>Consumed</h3></td>
-          <td>Cals: {{ todaysTotals.consumed.cals }}</td>
-          <td>P: {{ todaysTotals.consumed.P }}</td>
-          <td>C: {{ todaysTotals.consumed.C }}</td>
-          <td>F: {{ todaysTotals.consumed.F }}</td>
+          <td>Cals: {{ todaysTotals.consumed.cals.toFixed(0) }}</td>
+          <td>P: {{ todaysTotals.consumed.P.toFixed(0) }}</td>
+          <td>C: {{ todaysTotals.consumed.C.toFixed(0) }}</td>
+          <td>F: {{ todaysTotals.consumed.F.toFixed(0) }}</td>
           </tr>
           <tr>
           <td><h3>Planned</h3></td>
-          <td>Cals: {{ todaysTotals.planned.cals }}</td>
-          <td>P: {{ todaysTotals.planned.P }}</td>
-          <td>C: {{ todaysTotals.planned.C }}</td>
-          <td>F: {{ todaysTotals.planned.F }}</td>
+          <td>Cals: {{ todaysTotals.planned.cals.toFixed(0) }}</td>
+          <td>P: {{ todaysTotals.planned.P.toFixed(0) }}</td>
+          <td>C: {{ todaysTotals.planned.C.toFixed(0) }}</td>
+          <td>F: {{ todaysTotals.planned.F.toFixed(0) }}</td>
           </tr>
     </v-simple-table>
     <v-row style="height: 40px;"></v-row>
@@ -455,6 +455,7 @@ export default {
           },
         }).then((response) => {
         console.log(response);
+        this.formQuantity = 1;
         this.getUsersTrackingData();
       });
     },
