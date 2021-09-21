@@ -261,7 +261,7 @@ export default {
       templatesData: [],
       picker: '',
       landscape: true,
-      formFoodItem: 8, // sets the default autocomplete
+      formFoodItem: 4, // sets the default autocomplete
       formQuantity: 1.0,
       template: '',
       on: '',

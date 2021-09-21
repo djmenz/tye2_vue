@@ -172,7 +172,7 @@ export default {
       templates: [],
       picker: '',
       landscape: true,
-      formFoodItem: 8, // sets the default autocomplete
+      formFoodItem: 4, // sets the default autocomplete
       formQuantity: 1.0,
       template: '',
       on: '',
@@ -312,6 +312,7 @@ export default {
           },
         }).then((response) => {
         console.log(response);
+        this.formQuantity = 1.0;
         this.getMessage();
       });
     },
