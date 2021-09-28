@@ -111,10 +111,10 @@
     <tr v-for="message in currentTemplatesFood" v-bind:key="message">
       <td>{{ message.name }}</td>
       <td>{{ message.quantity }}</td>
-      <td>{{ message.calories * message.quantity }}</td>
-      <td>{{ message.protein  * message.quantity}}</td>
-      <td>{{ message.carbs * message.quantity }}</td>
-      <td>{{ message.fats * message.quantity }}</td>
+      <td>{{ (message.calories * message.quantity).toFixed(1) }}</td>
+      <td>{{ (message.protein  * message.quantity).toFixed(1)}}</td>
+      <td>{{ (message.carbs * message.quantity).toFixed(1) }}</td>
+      <td>{{ (message.fats * message.quantity).toFixed(1) }}</td>
       <td>{{ message.template_id }}</td>
       <td>{{ message.food_id }}</td>
       <td>{{ message.id }}</td>
@@ -134,10 +134,10 @@
  <v-simple-table>
           <tr>
           <td><h3>Template Totals</h3></td>
-          <td>Cals: {{ todaysTotals.cals }}</td>
-          <td>P: {{ todaysTotals.P }}</td>
-          <td>C: {{ todaysTotals.C }}</td>
-          <td>F: {{ todaysTotals.F }}</td>
+          <td>Cals: {{ todaysTotals.cals.toFixed(1) }}</td>
+          <td>P: {{ todaysTotals.P.toFixed(1) }}</td>
+          <td>C: {{ todaysTotals.C.toFixed(1) }}</td>
+          <td>F: {{ todaysTotals.F.toFixed(1) }}</td>
           </tr>
     </v-simple-table>
 <v-row style="height: 40px;"></v-row>

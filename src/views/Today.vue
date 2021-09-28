@@ -126,10 +126,10 @@
     <tr v-for="entry in currentTemplateData" v-bind:key="entry">
       <td>{{ entry.name }}</td>
       <td>{{ entry.quantity }}</td>
-      <td>{{ entry.calories * entry.quantity }}</td>
-      <td>{{ entry.protein  * entry.quantity}}</td>
-      <td>{{ entry.carbs * entry.quantity }}</td>
-      <td>{{ entry.fats * entry.quantity }}</td>
+      <td>{{ (entry.calories * entry.quantity).toFixed(1) }}</td>
+      <td>{{ (entry.protein  * entry.quantity).toFixed(1)}}</td>
+      <td>{{ (entry.carbs * entry.quantity).toFixed(1) }}</td>
+      <td>{{ (entry.fats * entry.quantity).toFixed(1) }}</td>
       <td>
       </td>
       </tr>
@@ -137,10 +137,10 @@
     <v-row style="height: 80px;"></v-row>
      <v-simple-table v-if="template != ''">
           <tr>
-          <td>Cals: {{ curTemplateTotals.cals }}</td>
-          <td>P: {{ curTemplateTotals.P }}</td>
-          <td>C: {{ curTemplateTotals.C }}</td>
-          <td>F: {{ curTemplateTotals.F }}</td>
+          <td>Cals: {{ curTemplateTotals.cals.toFixed(0) }}</td>
+          <td>P: {{ curTemplateTotals.P.toFixed(0) }}</td>
+          <td>C: {{ curTemplateTotals.C.toFixed(0) }}</td>
+          <td>F: {{ curTemplateTotals.F.toFixed(0) }}</td>
           </tr>
     </v-simple-table>
     </v-simple-table>
@@ -167,6 +167,22 @@
           P:{{ todaysCombinedtotals.P.toFixed(0) }}
           C:{{ todaysCombinedtotals.C.toFixed(0) }}
           F:{{ todaysCombinedtotals.F.toFixed(0) }}</h2>
+  <v-simple-table >
+    <tr>
+          <td><h3>Consumed</h3></td>
+          <td>Cals: {{ todaysTotals.consumed.cals.toFixed(0) }}</td>
+          <td>P: {{ todaysTotals.consumed.P.toFixed(0) }}</td>
+          <td>C: {{ todaysTotals.consumed.C.toFixed(0) }}</td>
+          <td>F: {{ todaysTotals.consumed.F.toFixed(0) }}</td>
+          </tr>
+          <tr>
+          <td><h3>Planned</h3></td>
+          <td>Cals: {{ todaysTotals.planned.cals.toFixed(0) }}</td>
+          <td>P: {{ todaysTotals.planned.P.toFixed(0) }}</td>
+          <td>C: {{ todaysTotals.planned.C.toFixed(0) }}</td>
+          <td>F: {{ todaysTotals.planned.F.toFixed(0) }}</td>
+          </tr>
+    </v-simple-table>
       <v-simple-table >
               <thead>
             <tr>
@@ -211,22 +227,7 @@
     </tbody>
     </v-simple-table>
     <v-row style="height: 80px;"></v-row>
-    <v-simple-table >
-    <tr>
-          <td><h3>Consumed</h3></td>
-          <td>Cals: {{ todaysTotals.consumed.cals.toFixed(0) }}</td>
-          <td>P: {{ todaysTotals.consumed.P.toFixed(0) }}</td>
-          <td>C: {{ todaysTotals.consumed.C.toFixed(0) }}</td>
-          <td>F: {{ todaysTotals.consumed.F.toFixed(0) }}</td>
-          </tr>
-          <tr>
-          <td><h3>Planned</h3></td>
-          <td>Cals: {{ todaysTotals.planned.cals.toFixed(0) }}</td>
-          <td>P: {{ todaysTotals.planned.P.toFixed(0) }}</td>
-          <td>C: {{ todaysTotals.planned.C.toFixed(0) }}</td>
-          <td>F: {{ todaysTotals.planned.F.toFixed(0) }}</td>
-          </tr>
-    </v-simple-table>
+
     <v-row style="height: 40px;"></v-row>
     <v-btn
       color="purple"
@@ -420,6 +421,7 @@ export default {
       ).sort(
         (a, b) => (a.id > b.id ? 1 : -1),
       );
+      console.log(oneTemplate);
       oneTemplate.forEach((e) => {
         this.submitTemplateItem(e, false);
       });

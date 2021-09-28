@@ -29,7 +29,7 @@
             v-model="formFats"
             label="Fat"
           ></v-text-field>
-      <p>{{ formPreviewCalories }} Estimated Calories</p>
+      <p>{{ formPreviewCalories.toFixed(0) }} Estimated Calories</p>
       <v-btn
       color="success"
       class="mr-4"
@@ -189,6 +189,11 @@ export default {
             Authorization: auth,
           },
         }).then((response) => {
+        this.formFoodName = '';
+        this.formCalories = 0;
+        this.formProtein = 0;
+        this.formCarbs = 0;
+        this.formFats = 0;
         console.log(response);
         this.getMasterlistData();
       });
